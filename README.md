@@ -6,6 +6,35 @@ We suggest you set these variables to level 0 when you don't want any log messag
 Set to level 1 to log error messages. Set to level 2 or above for increasing levels of log
 verbosity.
 
+The package offers 4 methods to emit debug messages:
+
+func (d Alert) Logf(level int, format string, parms ...interface{})
+
+Based on the log.Printf.
+
+
+
+func (d Alert) Fatalf(level int, format string, parms ...interface{})
+
+Same as above but stops program execution. The execution ends EVEN WHEN the log level of the message is higher the the current log level.
+
+
+
+func (d Alert) Printf(level int, format string, parms ...interface{})
+
+Based on fmt.Printf.
+
+
+
+func (d Alert) Sprintf(level int, format string, parms ...interface{}) string
+
+Based on fmt.Sprintf.
+
+
+
+
+In all the above methods the level parameter determines the log level of the message. The message will be actually emited only if, when the method is called, the log level is equal or higher than the message's log level. An empty string is returned by the Sprintf method if called with a message log level higher than the current log level.
+
 
 Example:
 
@@ -67,7 +96,47 @@ var Goose goose.Alert // Exported symbol needed only if you want to allow extern
 
    Goose.Logf(7, "Index: %#v", d.Index)
 
-   // Logs will be actually printed only if the first parameter (the log level) is less equal than the log level indicated by the goose variable. Remember to never use the zero value, like Goose.Logf(0,...), as we want to make the log level 0 to print no debug messages at all.
+   // Logs will be actually printed only if the first parameter (the message's log level) is lower or equal than the current log level indicated by the Goose variable. Remember to never use the zero value, like Goose.Logf(0,...), as we want to make the log level 0 to print no debug messages at all.
+
+
+
+
+
+// You may set multiple loggers if you need finer control on the verbosity
+
+type T1 struct {
+
+...
+
+}
+
+
+type T2 struct {
+
+...
+
+}
+
+
+var GooseT1 goose.Alert 
+
+var GooseT2 goose.Alert 
+
+
+...
+
+
+   GooseT1 = goose.Alert(1) // Only error messages will be logged
+
+   GooseT2 = goose.Alert(3) // More verbosity...
+
+...
+
+   GooseT1.Logf(2, "Final Off=%d (%o)", d.Buf.Off, d.Buf.Off) // not printed
+
+   ...
+
+   GooseT2.Logf(2, "Index: %#v", d.Index) // printed
 
 
 
