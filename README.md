@@ -16,7 +16,9 @@ In your initialization code, you may set the log levels of debug messages:
    .
 
    reptilian.Goose  = goose.Alert(1) // Only error messages will be logged
+
    reptext.Goose    = goose.Alert(0) // No debug messages at all
+
    djparser.Goose   = goose.Alert(4) // Error messages and less verbose messages (levels 2~4) will be logged
 
    .
@@ -31,13 +33,17 @@ In the package to be debugged:
 .
 
 import (
+
    .
    .
    .
+
    "github.com/luisfurquim/goose"
+
    .
    .
    .
+
 )
 
 .
