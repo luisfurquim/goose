@@ -8,25 +8,30 @@ verbosity.
 
 The package offers 4 methods to emit debug messages:
 
+```Go
 func (d Alert) Logf(level int, format string, parms ...interface{})
+```
 
 Based on the log.Printf.
 
 
-
+```Go
 func (d Alert) Fatalf(level int, format string, parms ...interface{})
+```
 
 Same as above but stops program execution. The execution ends EVEN WHEN the log level of the message is higher the the current log level.
 
 
-
+```Go
 func (d Alert) Printf(level int, format string, parms ...interface{})
+```
 
 Based on fmt.Printf.
 
 
-
+```Go
 func (d Alert) Sprintf(level int, format string, parms ...interface{}) string
+```
 
 Based on fmt.Sprintf.
 
@@ -36,10 +41,11 @@ Based on fmt.Sprintf.
 In all the above methods the level parameter determines the log level of the message. The message will be actually emited only if, when the method is called, the log level is equal or higher than the message's log level. An empty string is returned by the Sprintf method if called with a message log level higher than the current log level.
 
 
-Example:
+## Example:
 
 In your initialization code, you may set the log levels of debug messages:
 
+```Go
    .
    .
    .
@@ -53,10 +59,11 @@ In your initialization code, you may set the log levels of debug messages:
    .
    .
    .
-
+```
 
 In the package to be debugged:
 
+```Go
 .
 .
 .
@@ -98,12 +105,14 @@ var Goose goose.Alert // Exported symbol needed only if you want to allow extern
 
    // Logs will be actually printed only if the first parameter (the message's log level) is lower or equal than the current log level indicated by the Goose variable. Remember to never use the zero value, like Goose.Logf(0,...), as we want to make the log level 0 to print no debug messages at all.
 
+```
 
 
 
 
-// You may set multiple loggers if you need finer control on the verbosity
+You may set multiple loggers if you need finer control on the verbosity
 
+```Go
 type T1 struct {
 
 ...
@@ -138,5 +147,6 @@ var GooseT2 goose.Alert
 
    GooseT2.Logf(2, "Index: %#v", d.Index) // printed
 
+```
 
 
