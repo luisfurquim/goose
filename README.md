@@ -46,9 +46,7 @@ In all the above methods the level parameter determines the log level of the mes
 In your initialization code, you may set the log levels of debug messages:
 
 ```Go
-   .
-   .
-   .
+   ...
 
    reptilian.Goose  = goose.Alert(1) // Only error messages will be logged
 
@@ -56,50 +54,31 @@ In your initialization code, you may set the log levels of debug messages:
 
    djparser.Goose   = goose.Alert(4) // Error messages and less verbose messages (levels 2~4) will be logged
 
-   .
-   .
-   .
+   ...
 ```
 
 In the package to be debugged:
 
 ```Go
-.
-.
-.
 
 import (
-
-   .
-   .
-   .
+   ...
 
    "github.com/luisfurquim/goose"
-
-   .
-   .
-   .
-
+   ...
 )
 
-.
-.
-.
+...
 
 var Goose goose.Alert // Exported symbol needed only if you want to allow external control of the debug level
 
-.
-.
-.
-
+...
 
    // throughout your code you may log anything you want at varying levels of importance
 
    Goose.Logf(3, "Final Off=%d (%o)", d.Buf.Off, d.Buf.Off)
 
-   .
-   .
-   .
+   ...
 
    Goose.Logf(7, "Index: %#v", d.Index)
 
@@ -126,20 +105,15 @@ type T2 struct {
 
 }
 
-
 var GooseT1 goose.Alert 
-
 var GooseT2 goose.Alert 
 
-
-...
-
+   ...
 
    GooseT1 = goose.Alert(1) // Only error messages will be logged
-
    GooseT2 = goose.Alert(3) // More verbosity...
 
-...
+   ...
 
    GooseT1.Logf(2, "Final Off=%d (%o)", d.Buf.Off, d.Buf.Off) // not printed
 
@@ -148,5 +122,4 @@ var GooseT2 goose.Alert
    GooseT2.Logf(2, "Index: %#v", d.Index) // printed
 
 ```
-
 
