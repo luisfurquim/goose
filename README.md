@@ -67,7 +67,7 @@ var Goose goose.Alert // Exported symbol needed only if you want to allow extern
 
    Goose.Logf(7, "Index: %#v", d.Index)
 
-   // Logs will be actually printed
+   // Logs will be actually printed only if the first parameter (the log level) is less equal than the log level indicated by the goose variable. Remember to never use the zero value, like Goose.Logf(0,...), as we want to make the log level 0 to print no debug messages at all.
 
 
 
