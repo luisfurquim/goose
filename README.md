@@ -2,7 +2,7 @@
 Simple golang log package for debug purposes
 
 The idea is very simple. You create variables of type goose.Alert and set its debug level.
-We suggest you set these variables to level 0 when you don't want any log messages at all. 
+We suggest you set these variables to level 0 when you don't want any log messages at all.
 Set to level 1 to log error messages. Set to level 2 or above for increasing levels of log
 verbosity.
 
@@ -105,8 +105,8 @@ type T2 struct {
 
 }
 
-var GooseT1 goose.Alert 
-var GooseT2 goose.Alert 
+var GooseT1 goose.Alert
+var GooseT2 goose.Alert
 
    ...
 
@@ -120,6 +120,33 @@ var GooseT2 goose.Alert
    ...
 
    GooseT2.Logf(2, "Index: %#v", d.Index) // printed
+
+```
+
+You may add/remove source code reference by enabling/disabling trace.
+With trace enabled Goose automatically adds source code reference in
+the format {package}[source filename]<function/method>(line number).
+
+Check it with the following code:
+
+
+```Go
+
+   Goose = goose.Alert(1)
+   Goose.Logf(1,"no trace")
+   goose.TraceOn()
+   Goose.Logf(1,"trace")
+   goose.TraceOff()
+   Goose.Logf(1,"no trace")
+
+```
+
+You may redirect the output to the syslogger just calling UseSyslogNet:
+
+
+```Go
+
+   goose.UseSyslogNet("tcp", "myloghost.mydomain:514", syslog.LOG_ERR|syslog.LOG_LOCAL7)
 
 ```
 
