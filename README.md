@@ -125,7 +125,7 @@ var GooseT2 goose.Alert
 
 You may add/remove source code reference by enabling/disabling trace.
 With trace enabled Goose automatically adds source code reference in
-the format {package}[source filename]<function/method>(line number).
+the format {package}[source filename]&lt;function/method&gt;(line number).
 
 Check it with the following code:
 
