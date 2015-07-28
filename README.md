@@ -140,6 +140,16 @@ Check it with the following code:
 
 ```
 
+Outputs:
+
+```Go
+
+   2015/07/28 09:42:30 no trace
+   2015/07/28 09:42:30 {main}[teste-goose.go]<main>(14): trace
+   2015/07/28 09:42:30 no trace
+```
+
+
 You may redirect the output to the syslogger just calling UseSyslogNet:
 
 
