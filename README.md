@@ -1,10 +1,8 @@
-# goose
-Simple golang log package for debug purposes
-
-The idea is very simple. You create variables of type goose.Alert and set its debug level.
-We suggest you set these variables to level 0 when you don't want any log messages at all.
-Set to level 1 to log error messages. Set to level 2 or above for increasing levels of log
-verbosity.
+// Package goose is a simple golang log package for debug purposes.
+// The idea is very simple. You create variables of type goose.Alert and set its debug level.
+// We suggest you set these variables to level 0 when you don't want any log messages at all.
+// Set to level 1 to log error messages. Set to level 2 or above for increasing levels of log
+// verbosity.
 
 The package offers 4 methods to emit debug messages:
 
