@@ -111,3 +111,37 @@ func (d Alert) Sprintf(level int, format string, parms ...interface{}) string {
    }
    return ""
 }
+
+// Set accepts either integer or string values to initialize the goose Alert level
+func (d *Alert) Set(level interface{}) {
+   var n uint8
+
+   switch level.(type) {
+      case int8:
+         (*d) = Alert(level.(int8))
+      case int:
+         (*d) = Alert(level.(int))
+      case int16:
+         (*d) = Alert(level.(int16))
+      case int32:
+         (*d) = Alert(level.(int32))
+      case int64:
+         (*d) = Alert(level.(int64))
+      case uint8:
+         (*d) = Alert(level.(uint8))
+      case uint:
+         (*d) = Alert(level.(uint))
+      case uint16:
+         (*d) = Alert(level.(uint16))
+      case uint32:
+         (*d) = Alert(level.(uint32))
+      case uint64:
+         (*d) = Alert(level.(uint64))
+      case string:
+         fmt.Sscanf(level.(string),"%d",&n)
+         (*d) = Alert(n)
+      case []byte:
+         fmt.Sscanf(string(level.([]byte)),"%d",&n)
+         (*d) = Alert(n)
+   }
+}
