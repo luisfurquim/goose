@@ -27,26 +27,35 @@ func (ng SyslogGoose) Write(b []byte) (int, error) {
 
 func trace() string {
    var pc      []uintptr
-   var f        *runtime.Func
    var path    []string
    var file      string
-   var line      int
    var pkgfunc []string
    var pkg     []string
+   var n         int
+   var frames   *runtime.Frames
+   var frame     runtime.Frame
 
    if notrace {
       return ""
    }
    pc = make([]uintptr, 10)  // at least 1 entry needed
-   runtime.Callers(2, pc)
-   f = runtime.FuncForPC(pc[1])
-   file, line = f.FileLine(pc[1])
-   path = strings.Split(file,string([]byte{os.PathSeparator}))
+   n = runtime.Callers(2, pc)
+   if n == 0 {
+      return ""
+   }
+
+   pc = pc[:n]
+   frames = runtime.CallersFrames(pc)
+   frame, _ = frames.Next()
+   frame, _ = frames.Next()
+
+   path = strings.Split(frame.File,string([]byte{os.PathSeparator}))
    file = path[len(path)-1]
-   pkgfunc = strings.Split(f.Name(),string([]byte{os.PathSeparator}))
+
+   pkgfunc = strings.Split(frame.Function,string([]byte{os.PathSeparator}))
    pkgfunc = strings.Split(pkgfunc[len(pkgfunc)-1],".")
    pkg     = strings.Split(pkgfunc[0],"/")
-   return fmt.Sprintf("{%s}[%s]<%s>(%d): ", pkg[len(pkg)-1], file, strings.Join(pkgfunc[1:],"."), line)
+   return fmt.Sprintf("{%s}[%s]<%s>(%d): ", pkg[len(pkg)-1], file, strings.Join(pkgfunc[1:],"."), frame.Line)
 }
 
 // UseSyslogNet redirects the log output from os.Stderr to the system logger
