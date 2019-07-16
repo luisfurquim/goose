@@ -34,6 +34,7 @@ func trace() string {
    var n         int
    var frames   *runtime.Frames
    var frame     runtime.Frame
+   var id        string
 
    if notrace {
       return ""
@@ -55,7 +56,46 @@ func trace() string {
    pkgfunc = strings.Split(frame.Function,string([]byte{os.PathSeparator}))
    pkgfunc = strings.Split(pkgfunc[len(pkgfunc)-1],".")
    pkg     = strings.Split(pkgfunc[0],"/")
-   return fmt.Sprintf("{%s}[%s]<%s>(%d): ", pkg[len(pkg)-1], file, strings.Join(pkgfunc[1:],"."), frame.Line)
+   id      = fmt.Sprintf("{%s}[%s]<%s>(%d): ", pkg[len(pkg)-1], file, strings.Join(pkgfunc[1:],"."), frame.Line)
+   return strings.Replace(strings.Replace(id, "%2e", ".", -1), "%", "%%", -1)
+}
+
+func deeptrace(stacklevel int) string {
+   var pc      []uintptr
+   var path    []string
+   var file      string
+   var pkgfunc []string
+   var pkg     []string
+   var n         int
+   var frames   *runtime.Frames
+   var frame     runtime.Frame
+   var id        string
+
+   if notrace {
+      return ""
+   }
+   pc = make([]uintptr, 10)  // at least 1 entry needed
+   n = runtime.Callers(2, pc)
+   if n == 0 {
+      return ""
+   }
+
+   pc = pc[:n]
+   frames = runtime.CallersFrames(pc)
+   frame, _ = frames.Next()
+   frame, _ = frames.Next()
+   for ; stacklevel > 0; stacklevel-- {
+      frame, _ = frames.Next()
+   }
+
+   path = strings.Split(frame.File,string([]byte{os.PathSeparator}))
+   file = path[len(path)-1]
+
+   pkgfunc = strings.Split(frame.Function,string([]byte{os.PathSeparator}))
+   pkgfunc = strings.Split(pkgfunc[len(pkgfunc)-1],".")
+   pkg     = strings.Split(pkgfunc[0],"/")
+   id      = fmt.Sprintf("{%s}[%s]<%s>(%d): ", pkg[len(pkg)-1], file, strings.Join(pkgfunc[1:],"."), frame.Line)
+   return strings.Replace(strings.Replace(id, "%2e", ".", -1), "%", "%%", -1)
 }
 
 // UseSyslogNet redirects the log output from os.Stderr to the system logger
@@ -153,4 +193,36 @@ func (d *Alert) Set(level interface{}) {
          fmt.Sscanf(string(level.([]byte)),"%d",&n)
          (*d) = Alert(n)
    }
+}
+
+
+
+// Logf emits the messages based on the log.Printf
+func (d Alert) DeepLogf(stacklevel, level int, format string, parms ...interface{}) {
+   if uint8(d) >= uint8(level) {
+      log.Printf(deeptrace(stacklevel) + format , parms...)
+   }
+}
+
+// Fatalf behaves as Logf but stops program execution. The execution ends EVEN WHEN the log level of the message is higher the the current log level.
+func (d Alert) DeepFatalf(stacklevel, level int, format string, parms ...interface{}) {
+   if uint8(d) >= uint8(level) {
+      log.Fatalf(deeptrace(stacklevel) + format, parms...)
+   }
+   os.Exit(-1)
+}
+
+// Logf emits the messages based on fmt.Printf
+func (d Alert) DeepPrintf(stacklevel, level int, format string, parms ...interface{}) {
+   if uint8(d) >= uint8(level) {
+      fmt.Printf(deeptrace(stacklevel) + format, parms...)
+   }
+}
+
+// Sprintf returns the messages as a string value
+func (d Alert) DeepSprintf(stacklevel, level int, format string, parms ...interface{}) string {
+   if uint8(d) >= uint8(level) {
+      return fmt.Sprintf(deeptrace(stacklevel) + format, parms...)
+   }
+   return ""
 }
