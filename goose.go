@@ -4,14 +4,20 @@ import (
    "os"
    "fmt"
    "log"
+   "reflect"
    "strings"
    "runtime"
    "log/syslog"
+   "encoding/json"
 )
 
 // Alert is the basic type that implements the goose log object
 type Alert uint8
 
+type Geese map[string]interface{}
+
+var GooseType  reflect.Type = reflect.PtrTo(reflect.TypeOf(Alert(0)))
+var GooseValType  reflect.Type = reflect.TypeOf(Alert(0))
 
 // SyslogGoose is a wrapper type around *syslog.Writer to ensure a syslogger that satisfies the io.Writer inrterface
 type SyslogGoose struct {
@@ -195,7 +201,97 @@ func (d *Alert) Set(level interface{}) {
    }
 }
 
+func (geese Geese) Set(level interface{}) {
+   var i int
+   var g interface{}
+   var gtype reflect.Type
+   var gval reflect.Value
+   var valLevel reflect.Value
 
+   valLevel = reflect.ValueOf(level)
+
+   for _, g = range geese {
+      // We only consider parameters of struct pointer type
+      // From these we set the goose.Alert fields
+
+      // Ignore non pointer parameters
+      if reflect.TypeOf(g).Kind() != reflect.Ptr {
+         continue
+      }
+
+      // Ignore non struct pointer parameters
+      gval = reflect.ValueOf(g).Elem()
+      if gval.Kind() != reflect.Struct {
+         continue
+      }
+
+      // Search for goose.Alert fields
+      gtype = gval.Type()
+      for i=0; i<gtype.NumField(); i++ {
+         if gtype.Field(i).Type == GooseType.Elem() {
+            gval.Field(i).Set(valLevel)
+         }
+      }
+   }
+}
+
+
+func (geese Geese) UnmarshalJSON(data []byte) error {
+   var m map[string]interface{}
+   var err error
+   var pkg string
+   var rec interface{}
+   var dstRec interface{}
+   var gval reflect.Value
+   var afldVal reflect.Value
+   var recVal reflect.Value
+   var ok bool
+   var iter *reflect.MapIter
+
+   log.Printf("---------------------\n")
+
+   if err = json.Unmarshal(data, &m); err != nil {
+      return err
+   }
+
+   for pkg, rec = range m["Goose"].(map[string]interface{}) {
+      // Check if the key in the source exists in destiny
+      if dstRec, ok = geese[pkg]; !ok {
+         continue
+      }
+
+      // We only consider parameters of struct pointer type
+      // From these we set the goose.Alert fields
+
+      // Ignore non pointer parameters
+      if reflect.TypeOf(dstRec).Kind() != reflect.Ptr {
+         continue
+      }
+
+      // Ignore non struct pointer parameters
+      gval = reflect.ValueOf(dstRec).Elem()
+      if gval.Kind() != reflect.Struct {
+         continue
+      }
+
+      // Search for goose.Alert fields
+      recVal = reflect.ValueOf(rec)
+      iter = recVal.MapRange()
+      for iter.Next() {
+         afldVal = gval.FieldByName(iter.Key().String())
+         if !afldVal.IsZero() && afldVal.Type() == GooseType.Elem() {
+            afldVal.Set(iter.Value().Elem().Convert(GooseValType))
+         }
+      }
+   }
+
+   return nil
+}
+
+
+func (geese Geese) Get() map[string]interface{} {
+   return map[string]interface{}(geese)
+}
 
 // Logf emits the messages based on the log.Printf
 func (d Alert) DeepLogf(stacklevel, level int, format string, parms ...interface{}) {
