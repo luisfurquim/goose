@@ -206,9 +206,9 @@ func (geese Geese) Set(level interface{}) {
    var g interface{}
    var gtype reflect.Type
    var gval reflect.Value
-   var valLevel reflect.Value
+   var valLevel uint64
 
-   valLevel = reflect.ValueOf(level)
+   valLevel = uint64(reflect.ValueOf(level).Int())
 
    for _, g = range geese {
       // We only consider parameters of struct pointer type
@@ -229,7 +229,7 @@ func (geese Geese) Set(level interface{}) {
       gtype = gval.Type()
       for i=0; i<gtype.NumField(); i++ {
          if gtype.Field(i).Type == GooseType.Elem() {
-            gval.Field(i).Set(valLevel)
+            gval.Field(i).SetUint(valLevel)
          }
       }
    }
