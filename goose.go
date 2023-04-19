@@ -208,7 +208,12 @@ func (geese Geese) Set(level interface{}) {
    var gval reflect.Value
    var valLevel uint64
 
-   valLevel = uint64(reflect.ValueOf(level).Int())
+	switch level.(type) {
+	case int8, int16, int32, int64, int:
+		valLevel = uint64(reflect.ValueOf(level).Int())
+	case int8, int16, int32, int64, int:
+		valLevel = reflect.ValueOf(level).Uint()
+	}
 
    for _, g = range geese {
       // We only consider parameters of struct pointer type
