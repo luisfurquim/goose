@@ -211,7 +211,7 @@ func (geese Geese) Set(level interface{}) {
 	switch level.(type) {
 	case int8, int16, int32, int64, int:
 		valLevel = uint64(reflect.ValueOf(level).Int())
-	case int8, int16, int32, int64, int:
+	case uint8, uint16, uint32, uint64, uint:
 		valLevel = reflect.ValueOf(level).Uint()
 	}
 
