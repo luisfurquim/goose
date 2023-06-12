@@ -7,7 +7,6 @@ import (
    "reflect"
    "strings"
    "runtime"
-   "log/syslog"
    "encoding/json"
 )
 
@@ -19,17 +18,7 @@ type Geese map[string]interface{}
 var GooseType  reflect.Type = reflect.PtrTo(reflect.TypeOf(Alert(0)))
 var GooseValType  reflect.Type = reflect.TypeOf(Alert(0))
 
-// SyslogGoose is a wrapper type around *syslog.Writer to ensure a syslogger that satisfies the io.Writer inrterface
-type SyslogGoose struct {
-   W *syslog.Writer
-}
-
 var notrace bool = true
-
-// Write is the method that satisfies the io.Writer inrterface
-func (ng SyslogGoose) Write(b []byte) (int, error) {
-   return ng.W.Write(b)
-}
 
 func trace() string {
    var pc      []uintptr
@@ -102,26 +91,6 @@ func deeptrace(stacklevel int) string {
    pkg     = strings.Split(pkgfunc[0],"/")
    id      = fmt.Sprintf("{%s}[%s]<%s>(%d): ", pkg[len(pkg)-1], file, strings.Join(pkgfunc[1:],"."), frame.Line)
    return strings.Replace(strings.Replace(id, "%2e", ".", -1), "%", "%%", -1)
-}
-
-// UseSyslogNet redirects the log output from os.Stderr to the system logger
-// connecting to it via network.
-func UseSyslogNet(proto string, srv string, priority syslog.Priority) error {
-   var logOutput     SyslogGoose
-   var binParts    []string
-   var binName       string
-   var err           error
-
-   binParts = strings.Split(os.Args[0],string([]byte{os.PathSeparator}))
-   binName  = binParts[len(binParts)-1]
-
-   logOutput.W, err = syslog.Dial(proto, srv, priority, binName)
-   if err != nil {
-      return err
-   }
-   log.SetOutput(logOutput)
-   log.SetFlags(0)
-   return nil
 }
 
 // TraceOn enables the inclusion of the package name, source file name, method/function caller and source line number in the log messages.
